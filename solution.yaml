@@ -1,0 +1,10 @@
+apiVersion: solution.sap/v1
+kind: Solution
+
+metadata:
+  name: transaction-tracker-agent
+  version: 1.0.0
+  description: AI agent that retrieves transaction details and tenant information from the Transaction Tracker database by document ID
+
+assets:
+  - ref: ./assets/transaction-tracker-agent/asset.yaml
