@@ -73,17 +73,61 @@ def _build_mock_tools() -> list:
                     field_definitions[field_name] = (python_type, Field(default=None, description=field_info.get("description", "")))
 
             args_schema = create_model(f"{tool_name}_args", **field_definitions) if field_definitions else create_model(f"{tool_name}_args")
-            _response = json.dumps(mock_response)
 
-            async def _coroutine(_resp=_response, **kwargs) -> str:
-                return _resp
+            # Create a smart mock function that adapts response based on document_id
+            def _make_mock_function(_tool_name, _mock_response):
+                async def _coroutine(**kwargs) -> str:
+                    document_id = kwargs.get("document_id", "")
+
+                    # For get_transaction_details: adapt the response to match the requested document_id
+                    if _tool_name == "get_transaction_details" and document_id:
+                        # Create a copy of the mock response
+                        response = _mock_response.copy()
+
+                        # Check for known test document IDs
+                        if document_id == "TXN-999" or document_id.endswith("-999"):
+                            # Return empty dict for "not found" scenario
+                            return json.dumps({})
+
+                        # Update the document_id in the response to match the request
+                        response["document_id"] = document_id
+
+                        # Vary other fields slightly based on document_id for testing
+                        if document_id == "TXN-042":
+                            response["status"] = "Pending"
+                            response["type"] = "REFUND"
+                            response["amount"] = "500.00"
+                            response["reference"] = "REF-2026-042"
+                        elif document_id == "TXN-001":
+                            # Keep default values from mock
+                            pass
+                        else:
+                            # For any other ID, customize the reference
+                            response["reference"] = f"REF-2026-{document_id.split('-')[-1]}"
+
+                        return json.dumps(response)
+
+                    # For get_tenant_id: handle known scenarios
+                    elif _tool_name == "get_tenant_id" and document_id:
+                        if document_id == "TXN-999" or document_id.endswith("-999"):
+                            # Return empty dict for "not found" scenario
+                            return json.dumps({})
+
+                        # Return tenant based on document ID pattern
+                        response = _mock_response.copy()
+                        return json.dumps(response)
+
+                    # Default: return original mock response
+                    return json.dumps(_mock_response)
+
+                return _coroutine
 
             tools.append(
                 StructuredTool(
                     name=tool_name,
                     description=description,
                     args_schema=args_schema,
-                    coroutine=_coroutine,
+                    coroutine=_make_mock_function(tool_name, mock_response),
                 )
             )
 
