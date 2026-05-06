@@ -1,9 +1,12 @@
 # CRITICAL: Initialize telemetry BEFORE importing AI frameworks
-from sap_cloud_sdk.aicore import set_aicore_config
-from sap_cloud_sdk.core.telemetry import auto_instrument
-
-set_aicore_config()
-auto_instrument()
+try:
+    from sap_cloud_sdk.aicore import set_aicore_config
+    from sap_cloud_sdk.core.telemetry import auto_instrument
+    set_aicore_config()
+    auto_instrument()
+except ImportError:
+    # Running locally without SAP Cloud SDK
+    print("Warning: SAP Cloud SDK not available, running without telemetry")
 
 import logging
 import os
@@ -54,6 +57,55 @@ def main(host: str, port: int):
         ),
     )
     app = server.build()
+
+    # Add a simple test endpoint for direct HTTP testing
+    from starlette.responses import JSONResponse
+    from starlette.requests import Request
+    from starlette.routing import Route
+    from agent import SampleAgent
+
+    test_agent = SampleAgent()
+
+    async def test_query(request: Request):
+        """Simple test endpoint for direct HTTP queries (not part of A2A protocol)."""
+        try:
+            data = await request.json()
+            query = data.get("query", "")
+
+            if not query:
+                return JSONResponse(
+                    {"error": "Missing 'query' field"},
+                    status_code=400
+                )
+
+            # Use the agent's invoke method
+            result = await test_agent.invoke(query, "test-session")
+
+            return JSONResponse({
+                "status": result.status,
+                "query": query,
+                "response": result.message
+            })
+        except Exception as e:
+            logger.error(f"Test endpoint error: {e}")
+            return JSONResponse(
+                {"error": str(e)},
+                status_code=500
+            )
+
+    async def test_health(request: Request):
+        """Health check endpoint for testing."""
+        return JSONResponse({
+            "status": "healthy",
+            "agent": "transaction-tracker-agent",
+            "version": "1.0.0",
+            "test_endpoint": "/test/query"
+        })
+
+    # Add routes to the app
+    app.routes.append(Route("/test/query", test_query, methods=["POST"]))
+    app.routes.append(Route("/test/health", test_health, methods=["GET"]))
+
     StarletteInstrumentor().instrument_app(app)
 
     logger.info(f"Starting A2A server at http://{host}:{port}")

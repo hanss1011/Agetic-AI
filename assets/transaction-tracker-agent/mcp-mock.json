@@ -4,27 +4,262 @@
       "mcp_server_name": "transaction-tracker",
       "description": "Custom Transaction Tracker database tools",
       "tools": {
-        "get_transaction_details": {
-          "description": "Retrieve all available transaction fields from the Transaction Tracker database for a given document ID. Returns a dictionary of field names and values, or an empty dict if the document ID does not exist.",
+        "search_transactions": {
+          "description": "Search for transactions in the Transaction Tracker API by document ID. Returns basic transaction information including status, sender, receiver, timestamps, and system IDs. Use this for quick status lookups. Returns an empty dict if the document ID does not exist.",
           "input_schema": {
             "type": "object",
             "properties": {
               "document_id": {
                 "type": "string",
-                "description": "The unique document ID of the transaction to look up (e.g. TXN-001)."
+                "description": "The unique document ID to search for (e.g. ff6257db-05a0-4471-ba4f-6a571b67b9af)."
               }
             },
             "required": ["document_id"]
           },
           "mock_response": {
-            "document_id": "TXN-001",
-            "status": "Completed",
-            "amount": "1000.00",
-            "currency": "USD",
-            "created_at": "2026-01-15T10:00:00Z",
-            "updated_at": "2026-01-15T10:05:00Z",
-            "type": "PAYMENT",
-            "reference": "REF-2026-001"
+            "id": "AGn5XRu05zq00ep4JtNupfF-M4Ro",
+            "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+            "senderId": "sap_cloud_crm_my1000476",
+            "receiverId": "0LOVPI4",
+            "status": "R",
+            "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+            "attachments": false,
+            "application": "salescloud",
+            "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+            "systemId": "0LOVPI4",
+            "createdTime": "2026-05-06T18:03:15.821Z",
+            "sync": false
+          },
+          "mock_response_list": [
+            {
+              "id": "AGn5XRu05zq00ep4JtNupfF-M4Ro",
+              "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+              "senderId": "sap_cloud_crm_my1000476",
+              "receiverId": "0LOVPI4",
+              "status": "R",
+              "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-06T18:03:15.821Z",
+              "sync": false
+            },
+            {
+              "id": "AGn6q7Xotofmg696uxXlpIkBY_gp",
+              "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+              "senderId": "sap_cloud_crm_my1000476",
+              "receiverId": "0LOVPI4",
+              "status": "R",
+              "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-06T18:03:15.487Z",
+              "sync": false
+            },
+            {
+              "id": "AGn5agDaEe0h90GkV5bWIvBenUcf",
+              "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+              "senderId": "sap_cloud_crm_my1000476",
+              "receiverId": "0LOVPI4",
+              "status": "R",
+              "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-06T18:03:14.987Z",
+              "sync": false
+            },
+            {
+              "id": "AGnxM0uzgxA8Ua_9kwMykcCmdx5P",
+              "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+              "senderId": "sap_cloud_crm_my1000476",
+              "receiverId": "0LOVPI4",
+              "status": "R",
+              "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-06T18:03:14.628Z",
+              "sync": false
+            },
+            {
+              "id": "AGn5AYwWcJZslzQ-4nsVV-_hlgUu",
+              "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+              "senderId": "sap_cloud_crm_my1000476",
+              "receiverId": "0LOVPI4",
+              "status": "R",
+              "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-06T18:03:14.274Z",
+              "sync": false
+            },
+            {
+              "id": "AGn6oA7b6DsRJVkT28C4znNadkEQ",
+              "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+              "senderId": "sap_cloud_crm_my1000476",
+              "receiverId": "0LOVPI4",
+              "status": "R",
+              "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-06T18:03:13.626Z",
+              "sync": false
+            },
+            {
+              "id": "AGn6uAdLCDfceuzaMqok8EySpNY8",
+              "documentId": "ff6257db-05a0-4471-ba4f-6a571b67b9af",
+              "senderId": "sap_cloud_crm_my1000476",
+              "receiverId": "0LOVPI4",
+              "status": "R",
+              "srcDocumentType": "deliveryBlockingReasonS4ReplicationOut",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my400215-api.lab.s4hana.cloud.sap/sap/opu/odata4/sap/api_deliveryblockreason/srvd_a2x/sap/deliveryblockreason/0001",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-06T18:03:13.389Z",
+              "sync": false
+            }
+          ]
+        },
+        "get_transaction_details": {
+          "description": "Retrieve comprehensive transaction details including service execution stages and properties from the Transaction Tracker API for a given document ID. Returns detailed information with transaction info, serviceInfo array (stages: IN, ID, TR, OB), and properties array. Returns an empty dict if the document ID does not exist.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "document_id": {
+                "type": "string",
+                "description": "The unique document ID of the transaction to look up (e.g. FA163E51-A3F5-1FE1-9298-BD5598484262)."
+              }
+            },
+            "required": ["document_id"]
+          },
+          "mock_response": {
+            "information": {
+              "id": "8096b0a2-dcd0-4374-7c8c-ec742f848034",
+              "documentId": "FA163E51-A3F5-1FE1-9298-BD5598484262",
+              "senderId": "0LOVPI4",
+              "receiverId": "sap_cloud_crm_my1000476",
+              "status": "C",
+              "srcDocumentType": "BusinessPartnerRelationshipSUITEBulkReplicateRequestOutMessage",
+              "attachments": false,
+              "application": "salescloud",
+              "destination": "https://my1000476.vlab.crm.cloud.sap/sap/c4c/api/v1/inbound-data-connector-service/messages/sap.crm.md.integrationmetadataservice.entity.businessPartnerRelationshipS4ReplicationMessageIn",
+              "systemId": "0LOVPI4",
+              "createdTime": "2026-05-05T21:03:52.473Z",
+              "sync": false
+            },
+            "serviceInfo": [
+              {
+                "serviceId": "AGn6Wzj0k-DYfHI1YAcLa2K1lQ2n",
+                "serviceName": "com.sap.http.outbound",
+                "status": "C",
+                "stage": "OB",
+                "system": "salescloudqat1",
+                "destination": "https://my1000476.vlab.crm.cloud.sap/sap/c4c/api/v1/inbound-data-connector-service/messages/sap.crm.md.integrationmetadataservice.entity.businessPartnerRelationshipS4ReplicationMessageIn",
+                "startTime": "2026-05-05T21:03:52.292Z",
+                "endTime": "2026-05-05T21:03:52.451Z",
+                "createdTime": "2026-05-05T21:03:52.473Z"
+              },
+              {
+                "serviceId": "AGn6Wzj8MJrJE32Bo2LPlJxaG1c3",
+                "serviceName": "com.sap.common.transformation",
+                "status": "P",
+                "stage": "TR",
+                "system": "salescloudqat1",
+                "startTime": "2026-05-05T21:03:52.263Z",
+                "endTime": "2026-05-05T21:03:52.290Z",
+                "createdTime": "2026-05-05T21:03:52.316Z"
+              },
+              {
+                "serviceId": "AGn6WziBzR36SEkLV0BOJUR2g9Fk",
+                "serviceName": "com.sap.common.extraction",
+                "status": "P",
+                "stage": "ID",
+                "system": "salescloudqat1",
+                "startTime": "2026-05-05T21:03:52.219Z",
+                "endTime": "2026-05-05T21:03:52.263Z",
+                "createdTime": "2026-05-05T21:03:52.292Z"
+              },
+              {
+                "serviceId": "AGn6Wzi18W8gGw1bM5ubS_WV--Mi",
+                "serviceName": "com.sap.soap.inbound",
+                "status": "P",
+                "stage": "IN",
+                "system": "salescloudqat1",
+                "startTime": "2026-05-05T21:03:52.184Z",
+                "endTime": "2026-05-05T21:03:52.210Z",
+                "createdTime": "2026-05-05T21:03:52.236Z"
+              }
+            ],
+            "properties": [
+              {
+                "serviceId": "AGn6Wzj0k-DYfHI1YAcLa2K1lQ2n",
+                "content": {
+                  "ig-mpl-id": "AGn6Wzj0k-DYfHI1YAcLa2K1lQ2n",
+                  "ig-basic-credentials-name": "na",
+                  "ig-host": "https://my1000476.vlab.crm.cloud.sap/sap/c4c/api/v1/inbound-data-connector-service/messages/sap.crm.md.integrationmetadataservice.entity.businessPartnerRelationshipS4ReplicationMessageIn",
+                  "ig-auth-type": "CERT",
+                  "ig-destinationApplication-name": "SalesCloudV2",
+                  "gw-connection-id": "CONNECTION_SalesCloudV2_ANY_Default"
+                },
+                "createdTime": "2026-05-05T21:03:52.473Z"
+              },
+              {
+                "serviceId": "AGn6Wzj8MJrJE32Bo2LPlJxaG1c3",
+                "content": {
+                  "gw-target-schemaValidation": "false",
+                  "ig-mpl-id": "AGn6Wzj8MJrJE32Bo2LPlJxaG1c3",
+                  "ig-destination-stage": "outbound-http",
+                  "ig-target-documentVersion": "0",
+                  "ig-destination-queue": "delivery_https",
+                  "ig-target-documentStandard": "SALESCLOUD",
+                  "gw-standard-map": "pd:HCIOWNERPID:MAPPING_ANY_S4CE_0_BusinessPartnerRelationshipSUITEBulkReplicateRequestOutMessage_SALESCLOUD_0_businessPartnerRelationshipS4ReplicationMessageIn:Binary",
+                  "ig-target-documentName": "businessPartnerRelationshipS4ReplicationMessageIn"
+                },
+                "createdTime": "2026-05-05T21:03:52.316Z"
+              },
+              {
+                "serviceId": "AGn6WziBzR36SEkLV0BOJUR2g9Fk",
+                "content": {
+                  "ig-integrationType": "CustomerToApplication",
+                  "ig-mpl-id": "AGn6WziBzR36SEkLV0BOJUR2g9Fk",
+                  "ig-sender-xref-id": "0LOVPI4",
+                  "ig-instance-datacenter": "ANY",
+                  "ig-pd-identifier-alias": "sap_cloud_crm_my1000476",
+                  "ig-source-documentStandard": "S4CE",
+                  "ig-solution": "salescloud",
+                  "ig-organization-type": "BUYER",
+                  "ig-correlation-id": "8096b0a2-dcd0-4374-7c8c-ec742f848034",
+                  "ig-destinationApplication-name": "SalesCloudV2",
+                  "gw-schemaValidation": "false",
+                  "ig-system-name": "salescloudqat1"
+                },
+                "createdTime": "2026-05-05T21:03:52.292Z"
+              },
+              {
+                "serviceId": "AGn6Wzi18W8gGw1bM5ubS_WV--Mi",
+                "content": {
+                  "ig-mpl-id": "AGn6Wzi18W8gGw1bM5ubS_WV--Mi",
+                  "ig-organization-id": "0010351239",
+                  "gw-scenario-id": "IntegrationScenario_S4CE_0_BusinessPartnerRelationshipSUITEBulkReplicateRequestOutMessage",
+                  "ig-content-type": "text/xml;charset=utf-8",
+                  "ig-correlation-id": "8096b0a2-dcd0-4374-7c8c-ec742f848034",
+                  "ig-auth-user": "3ce156bdf93d19eee50784bb0242a86366e223f894b352f4b7a846e1946e6e48",
+                  "ig-system-name": "salescloudqat1"
+                },
+                "createdTime": "2026-05-05T21:03:52.236Z"
+              }
+            ]
           }
         },
         "get_tenant_id": {
@@ -40,7 +275,7 @@
             "required": ["document_id"]
           },
           "mock_response": {
-            "tenant_id": "TENANT-A"
+            "tenant_id": "sap_cloud_crm_my1000476"
           }
         }
       }
@@ -52,8 +287,8 @@
     "mock_mode": true,
     "deterministic": true,
     "total_servers": 1,
-    "total_tools": 2,
+    "total_tools": 3,
     "generated_from": ["custom-tools"],
-    "generation_date": "2026-05-05"
+    "generation_date": "2026-05-06"
   }
 }

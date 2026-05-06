@@ -79,31 +79,45 @@ def _build_mock_tools() -> list:
                 async def _coroutine(**kwargs) -> str:
                     document_id = kwargs.get("document_id", "")
 
-                    # For get_transaction_details: adapt the response to match the requested document_id
-                    if _tool_name == "get_transaction_details" and document_id:
-                        # Create a copy of the mock response
-                        response = _mock_response.copy()
-
+                    # For search_transactions: adapt the response to match the requested document_id
+                    if _tool_name == "search_transactions" and document_id:
                         # Check for known test document IDs
                         if document_id == "TXN-999" or document_id.endswith("-999"):
                             # Return empty dict for "not found" scenario
                             return json.dumps({})
 
-                        # Update the document_id in the response to match the request
-                        response["document_id"] = document_id
+                        # Use the main mock response and adapt it
+                        response = _mock_response.copy()
 
-                        # Vary other fields slightly based on document_id for testing
-                        if document_id == "TXN-042":
-                            response["status"] = "Pending"
-                            response["type"] = "REFUND"
-                            response["amount"] = "500.00"
-                            response["reference"] = "REF-2026-042"
-                        elif document_id == "TXN-001":
-                            # Keep default values from mock
-                            pass
+                        # Update documentId to match the request
+                        response["documentId"] = document_id
+
+                        # Vary status based on document ID for testing different scenarios
+                        if "abc" in document_id.lower():
+                            response["status"] = "S"  # Success
+                            response["id"] = "AGnABC123xyz456789"
+                        elif "err" in document_id.lower():
+                            response["status"] = "F"  # Failed
+                            response["id"] = "AGnERR123xyz456789"
+                        elif "proc" in document_id.lower():
+                            response["status"] = "P"  # Processing
+                            response["id"] = "AGnPROC123xyz456789"
                         else:
-                            # For any other ID, customize the reference
-                            response["reference"] = f"REF-2026-{document_id.split('-')[-1]}"
+                            # Keep "R" (Received) as default
+                            pass
+
+                        return json.dumps(response)
+
+                    # For get_transaction_details: return comprehensive detail
+                    elif _tool_name == "get_transaction_details" and document_id:
+                        if document_id == "TXN-999" or document_id.endswith("-999"):
+                            # Return empty dict for "not found" scenario
+                            return json.dumps({})
+
+                        # Use the main mock response and adapt the documentId
+                        response = _mock_response.copy()
+                        if "information" in response:
+                            response["information"]["documentId"] = document_id
 
                         return json.dumps(response)
 
@@ -145,7 +159,7 @@ async def get_mcp_tools() -> list:
         return _build_mock_tools()
 
     # Custom tools — backed by the injectable TransactionTrackerClient
-    from tools import get_transaction_details_tool, get_tenant_id_tool
-    tools = [get_transaction_details_tool, get_tenant_id_tool]
+    from tools import search_transactions_tool, get_transaction_details_tool, get_tenant_id_tool
+    tools = [search_transactions_tool, get_transaction_details_tool, get_tenant_id_tool]
     logger.info("Loaded %d Transaction Tracker tool(s)", len(tools))
     return tools

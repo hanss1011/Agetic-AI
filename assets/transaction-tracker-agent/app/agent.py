@@ -49,14 +49,18 @@ tracer = trace.get_tracer(__name__)  # For distributed tracing spans
 # ============================================================================
 # Document ID Extraction
 # ============================================================================
-# Regex to extract a document ID from a user query (e.g. TXN-001, DOC-42, INV-2024-001)
+# Regex to extract a document ID from a user query
+# Matches formats like:
+#   - TXN-001, DOC-42, INV-2024-001 (traditional codes)
+#   - FA163E51-A3F5-1FE1-9298-BD5598484262 (UUID-like)
+#   - ff6257db-05a0-4471-ba4f-6a571b67b9af (lowercase UUID)
+#   - abc-123-success (alphanumeric with hyphens)
 # Pattern explanation:
 #   \b         = Word boundary
-#   [A-Z]{2,10} = 2-10 uppercase letters (e.g., "TXN", "DOC", "INV")
-#   -          = Literal hyphen
-#   [\w-]+     = One or more word characters or hyphens
+#   [A-Za-z0-9]+ = One or more alphanumeric characters
+#   (?:-[A-Za-z0-9]+)+ = One or more groups of hyphen + alphanumeric
 #   \b         = Word boundary
-_DOCUMENT_ID_PATTERN = re.compile(r"\b([A-Z]{2,10}-[\w-]+)\b", re.IGNORECASE)
+_DOCUMENT_ID_PATTERN = re.compile(r"\b([A-Za-z0-9]+(?:-[A-Za-z0-9]+)+)\b")
 
 
 def _extract_document_id(query: str) -> Optional[str]:
@@ -91,12 +95,52 @@ def get_temperature() -> float:
     validation={"format": "markdown", "max_length": 5000},
 )
 def get_system_prompt() -> str:
-    return """You are an AI agent that retrieves transaction details and tenant information from the Transaction Tracker database.
+    return """You are an AI agent that retrieves transaction information from the Transaction Tracker database.
 
-Use get_transaction_details when asked for transaction information given a document ID.
+Available Tools:
+- search_transactions: Search for transactions by document ID (returns basic info from search API)
+- get_transaction_details: Get comprehensive details including service execution stages (returns full details API response)
+- get_tenant_id: Get the tenant identifier for a transaction
+
+Use search_transactions for quick status checks and basic transaction information.
+Use get_transaction_details when asked for detailed information, service stages, execution flow, or properties.
 Use get_tenant_id when asked for the tenant where a transaction was processed.
 
+Search API Fields (from search_transactions):
+- id: Unique transaction ID
+- documentId: Business document identifier
+- senderId: Source system/tenant ID
+- receiverId: Destination system ID
+- status: Transaction status (R=Received, P=Processing, S=Success, F=Failed)
+- srcDocumentType: Type of source document
+- attachments: Whether transaction has attachments
+- application: Source application
+- destination: Target API endpoint
+- systemId: System identifier
+- createdTime: Transaction creation timestamp
+- sync: Whether transaction is synchronous
+
+Details API Fields (from get_transaction_details):
+- information: Basic transaction info (includes status "C" for Completed)
+- serviceInfo: Array of service execution stages with:
+  - serviceId: Unique service execution ID
+  - serviceName: Service component name
+  - status: Service execution status (C=Completed, P=Processed)
+  - stage: Pipeline stage (IN=Inbound, ID=Identification, TR=Transformation, OB=Outbound)
+  - system: System name
+  - destination: Target endpoint (for OB stage)
+  - startTime: Stage start timestamp
+  - endTime: Stage end timestamp
+- properties: Array of service properties and metadata for each stage
+
+Service Execution Stages (IN → ID → TR → OB):
+1. IN (Inbound): Receive incoming message
+2. ID (Identification): Extract and identify content
+3. TR (Transformation): Transform message format
+4. OB (Outbound): Send to destination
+
 Present results in a readable, structured format with field labels and values.
+For detailed queries, show the execution pipeline with timing information.
 Respond with a clear "not found" message if the document ID does not exist — do not invent or guess any data.
 Never hallucinate transaction data — only return what the tools provide.
 Always inform the user which document ID was used in the lookup."""
@@ -118,9 +162,9 @@ class SampleAgent:
         Sets up the LLM (Language Model) that powers the agent's decision-making.
 
         Configuration:
-          - Model: Configurable via LITELLM_MODEL env var (default: Claude Sonnet 4.6)
+          - Model: Configurable via LITELLM_MODEL env var (default: Claude Sonnet 4.5)
           - Temperature: 0.0 for deterministic responses (no randomness)
-          - API Base: LiteLLM proxy URL for routing to Claude API
+          - API Base: SAP AI Core or LiteLLM proxy
 
         The LLM is the "brain" that:
           1. Reads user queries
@@ -130,25 +174,59 @@ class SampleAgent:
         import os
         from langchain_litellm import ChatLiteLLM
 
-        # Get LiteLLM proxy configuration from environment
-        api_base = os.environ.get("LITELLM_API_BASE")  # e.g., http://localhost:6655
-        api_key = os.environ.get("LITELLM_API_KEY")    # Proxy API key
+        # Check if using SAP AI Core
+        aicore_client_id = os.environ.get("AICORE_CLIENT_ID")
+        aicore_client_secret = os.environ.get("AICORE_CLIENT_SECRET")
+        aicore_auth_url = os.environ.get("AICORE_AUTH_URL")
+        aicore_base_url = os.environ.get("AICORE_BASE_URL")
 
-        # Initialize ChatLiteLLM (routes to Claude via proxy)
-        if api_base:
-            # Use proxy configuration for local development
-            self.llm = ChatLiteLLM(
-                model=get_model_name(),           # e.g., "anthropic/claude-sonnet-4.6"
-                temperature=get_temperature(),    # 0.0 = deterministic
-                api_base=api_base,                # LiteLLM proxy URL
-                api_key=api_key                   # Proxy authentication
+        if aicore_client_id and aicore_client_secret and aicore_auth_url and aicore_base_url:
+            # Use SAP AI Core
+            logger.info("Initializing LLM with SAP AI Core")
+
+            # Get OAuth token from SAP AI Core
+            import requests
+            token_response = requests.post(
+                f"{aicore_auth_url}/oauth/token",
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": aicore_client_id,
+                    "client_secret": aicore_client_secret
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
-        else:
-            # Direct API access (production)
+            token_response.raise_for_status()
+            access_token = token_response.json()["access_token"]
+            logger.info("Successfully obtained access token from SAP AI Core  %s", access_token)
+            
+
+            # Initialize with SAP AI Core endpoint
             self.llm = ChatLiteLLM(
                 model=get_model_name(),
-                temperature=get_temperature()
+                temperature=get_temperature(),
+                api_base=f"{aicore_base_url}/v2",
+                api_key=access_token,
+                custom_llm_provider="sap"
             )
+        else:
+            # Fall back to LiteLLM proxy
+            api_base = os.environ.get("LITELLM_API_BASE")
+            api_key = os.environ.get("LITELLM_API_KEY")
+
+            if api_base:
+                logger.info("Initializing LLM with LiteLLM proxy")
+                self.llm = ChatLiteLLM(
+                    model=get_model_name(),
+                    temperature=get_temperature(),
+                    api_base=api_base,
+                    api_key=api_key
+                )
+            else:
+                logger.info("Initializing LLM with direct API access")
+                self.llm = ChatLiteLLM(
+                    model=get_model_name(),
+                    temperature=get_temperature()
+                )
 
         # Graph will be lazily built on first use (see _get_graph)
         self._graph = None

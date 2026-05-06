@@ -8,7 +8,7 @@ uvicorn==0.40.0
 httpx==0.28.1
 python-dotenv==1.2.1
 click==8.3.1
-sap-cloud-sdk @ https://common.repositories.cloud.sap/artifactory/api/pypi/application-foundation-sdk-python/sap-cloud-sdk/0.11.3.dev20260423+contribs.sapphire.internal.testing.0a2505a/sap_cloud_sdk-0.11.3.dev20260423+contribs.sapphire.internal.testing.0a2505a-py3-none-any.whl
 mcp>=1.0.0
 opentelemetry-instrumentation-starlette
 pydantic
+requests

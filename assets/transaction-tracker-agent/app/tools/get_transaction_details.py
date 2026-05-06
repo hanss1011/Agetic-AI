@@ -1,8 +1,8 @@
 """
 Tool: get_transaction_details
 
-Retrieves all available fields for a transaction from the Transaction Tracker
-API given a document ID.
+Retrieves comprehensive transaction details including service execution stages
+and properties from the Transaction Tracker API for a specific document ID.
 """
 import asyncio
 import logging
@@ -18,26 +18,30 @@ logger = logging.getLogger(__name__)
 
 class GetTransactionDetailsInput(BaseModel):
     document_id: str = Field(
-        description="The unique document ID of the transaction to look up (e.g. TXN-001)."
+        description="The unique document ID of the transaction to look up (e.g. FA163E51-A3F5-1FE1-9298-BD5598484262)."
     )
 
 
 async def _get_transaction_details_async(document_id: str) -> dict:
     """
-    Query the Transaction Tracker API for all fields of the transaction
-    identified by *document_id*.
+    Query the Transaction Tracker API for comprehensive transaction details
+    including service execution stages and properties.
 
-    Returns a dict containing the transaction fields and their values,
-    or an empty dict if the document ID is not found.
+    Returns a dict containing:
+    - information: Basic transaction details
+    - serviceInfo: Array of service execution stages (IN, ID, TR, OB)
+    - properties: Array of service properties and metadata
+
+    Returns an empty dict if the document ID is not found.
     """
     try:
         client = get_api_client()
-        result: Optional[dict] = await client.get_transaction_details(document_id)
+        result: Optional[dict] = await client.get_transaction_detail(document_id)
         if result:
             logger.info("Retrieved transaction details for document_id=%s", document_id)
             return result
 
-        logger.warning("No transaction found for document_id=%s", document_id)
+        logger.warning("No transaction details found for document_id=%s", document_id)
         return {}
 
     except Exception as exc:
@@ -75,9 +79,12 @@ get_transaction_details_tool = StructuredTool.from_function(
     func=_get_transaction_details,
     name="get_transaction_details",
     description=(
-        "Retrieve all available transaction fields from the Transaction Tracker API "
-        "for a given document ID. Returns a dictionary of field names and values, "
-        "or an empty dict if the document ID does not exist."
+        "Retrieve comprehensive transaction details from the Transaction Tracker API "
+        "for a given document ID. Returns detailed information including:\n"
+        "- Basic transaction information (id, documentId, senderId, receiverId, status, etc.)\n"
+        "- Service execution stages (IN=Inbound, ID=Identification, TR=Transformation, OB=Outbound)\n"
+        "- Properties and metadata for each service stage\n"
+        "Returns an empty dict if the document ID does not exist."
     ),
     args_schema=GetTransactionDetailsInput,
     coroutine=_get_transaction_details_async,  # Support async execution
